@@ -1,6 +1,8 @@
 ## Stackanetes
 
-Let's get stackanetes running on OpenShift Origin on CentOS! Here's how we do it. In this case, we'll begin life with spinning up 
+Here's a set of playbooks to spin up [Stackanetes](https://github.com/stackanetes/stackanetes) on OpenShift Origin.
+
+EXPERIMENT WARNING: This is still an experiment, it's fairly close at this point but is failing on a last couple pods.
 
 ### Using the playbook
 
