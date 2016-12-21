@@ -14,7 +14,7 @@ deployment:
 
 network:
   # Network interface name on the Kubernetes nodes.
-  minion_interface_name: "eno1"
+  minion_interface_name: "{{ minion_interface_name }}"
   # List of IPs of Kubernetes nodes that may be used
   # to expose externally certain services when Ingress
   # is disabled (i.e. Horizon, nova-novncproxy).
