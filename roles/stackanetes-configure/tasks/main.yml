@@ -1,0 +1,14 @@
+---
+- name: See if the stackanetes namespace exists
+  shell: >
+    oc projects
+  register: oc_projects
+
+- include: setup.yml
+  when: "'{{ stackanetes_namespace }}' not in oc_projects.stdout and not stackanetes_teardown "
+
+- include: namespace.yml
+  when: "'{{ stackanetes_namespace }}' not in oc_projects.stdout and not stackanetes_teardown "
+
+- include: teardown.yml
+  when: "stackanetes_teardown"

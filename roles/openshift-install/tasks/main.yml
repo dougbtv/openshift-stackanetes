@@ -1,0 +1,19 @@
+---
+- name: Enable openshift origin repos
+  yum:
+    name: centos-release-openshift-origin
+    state: present
+
+- name: Install deps
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - wget 
+    - git 
+    - net-tools 
+    - bind-utils 
+    - iptables-services 
+    - bridge-utils 
+    - bash-completion 
+    - origin-clients

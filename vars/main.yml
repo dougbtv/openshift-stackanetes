@@ -1,0 +1,4 @@
+facter_ipaddress: ipaddress_eth0
+stackanetes_namespace: openstack
+stackanetes_teardown: false
+skip_kpm_push: false

@@ -1,0 +1,29 @@
+# DNS is flux0red with `oc cluster up` you can't resolve cluster IP addresses.
+---
+
+- name: Get projects
+  shell: >
+    oc projects -q
+  register: oc_projects
+
+- name: Fail when there's no kpm registry project
+  fail:
+    msg: This play requires that the kpm registry project is running already.
+  when: "'kpm' not in oc_projects.stdout"
+
+# - debug: "msg={{ main_ip_address }}"
+
+- name: Template resolv.conf
+  template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+
+# - debug: "msg={{ kpm_cluster_url }}"
+
+- name: nslookup google to make sure it can be found
+  shell: >
+    nslookup -timeout=2 google.com
+
+- name: nslookup the cluster URL to make sure it can be found
+  shell: >
+    nslookup -timeout=2 {{ kpm_cluster_url.stdout }}

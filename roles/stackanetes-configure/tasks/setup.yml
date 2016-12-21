@@ -1,0 +1,73 @@
+---
+# This can cause annoying random-looking failures on redeploys if this isn't removed.
+- name: Always remove /tmp/stackanetes
+  file:
+    path: /tmp/stackanetes
+    state: absent
+
+# Git ignore didn't quite do what I wanted it to.
+# - name: Template gitignore (to ignore parameters.yaml)
+#   template:
+#     src: gitignore.j2
+#     dest: /root/.gitignore
+#   register: template_gitignore
+
+# - name: Configure git to use global gitignore
+#   command: >
+#     git config --global core.excludesfile ~/.gitignore
+#   when: template_gitignore.changed
+
+- name: Clone stackanetes
+  git: 
+    repo: https://github.com/stackanetes/stackanetes.git
+    dest: /usr/src/stackanetes
+    # Note: tested commitish was: 567745aa44b9b6d16e1aba8f4f428ce838a04a80
+    # force: yes
+    version: HEAD
+  register: git_stackanetes
+
+# TODO: This needs to have further templating -- all the passwords are default.
+- name: Template stackanetes parameters
+  template:
+    src: stackanetes-parameters.yml.j2
+    dest: /root/stackanetes-parameters.yaml
+
+# Maybe for the future...
+# [root@stackanetes ~]# kpm list -H http://kpm-registry.kpm.svc.cluster.local
+# This didn't work -- when the registry is empty.
+# Once there's something in there, it works a charm.
+
+- name: Push all the stackanetes kpm packages up to the registry
+  shell: >
+    find -maxdepth 1  -type d -exec bash -c "cd {} ; [[ -f manifest.jsonnet ]] && 
+    kpm push -H http://{{ kpm_registry_url }} -f" \;
+  args: 
+    chdir: /usr/src/stackanetes
+  register: kpm_push_result
+  when: "not skip_kpm_push and git_stackanetes.changed"
+
+# - debug: "msg={{ kpm_push_result }}"
+
+- name: Check if labels exist
+  shell: >
+    kubectl get nodes --show-labels
+  register: node_labels
+
+- name: Get Node name (Limited to single node, right now.)
+  shell: > 
+    oc get nodes  | grep -v "^NAME" | tail -n1 | awk '{print $1}'
+  register: node_name
+
+- name: Assign control-plane label to node (single node only)
+  shell: >
+    kubectl label node {{ node_name.stdout }} openstack-control-plane=enabled
+  when: "'openstack-control-plane' not in node_labels.stdout"
+
+- name: Assign compute-node label to node (single node only)
+  shell: >
+    kubectl label node {{ node_name.stdout }} openstack-compute-node=enabled
+  when: "'openstack-compute-node' not in node_labels.stdout"
+
+# $ kubectl label node 192.168.122.74 openstack-control-plane=enabled
+# $ kubectl label node 192.168.122.74 openstack-compute-node=enabled
+# $ kubectl get nodes --show-labels

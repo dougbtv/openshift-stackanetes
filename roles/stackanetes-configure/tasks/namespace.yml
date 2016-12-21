@@ -1,0 +1,71 @@
+---
+# Configure everything in the stackanetes namespace.
+
+- name: Create stackanetes namespace
+  command: >
+    oc new-project {{ stackanetes_namespace }}
+
+- name: Always switch to stackanetes namespace
+  command: >
+    oc project {{ stackanetes_namespace }}
+
+- name: Template stackanetes scc
+  template:
+    src: stackanetes-scc.yml.j2
+    dest: /root/stackanetes-scc.yml
+  register: template_scc
+
+- name: List sccs
+  shell: >
+    oc get scc | awk '{print $1}'
+  register: list_sccs
+
+- name: Create SCC
+  shell: >
+    oc create -f /root/stackanetes-scc.yml
+  when: "template_scc.changed or 'stackanetes' not in list_sccs.stdout"
+
+# - name: Assign stackanetes SCC to default serviceaccount user 
+#   shell: >
+#     oc adm policy add-scc-to-user stackanetes -z default
+
+- name: Assign PRIVILEDGED SCC to default serviceaccount user 
+  shell: >
+    oc adm policy add-scc-to-user privileged -z default
+
+- name: Grant view API privileges to service accounts
+  shell: >
+    oc adm policy add-cluster-role-to-user view {{ item }}
+  with_items:
+    - "system:serviceaccount:{{ stackanetes_namespace }}"
+    - "system:serviceaccount:{{ stackanetes_namespace }}:default"
+
+- name: Add role to admin user for this namespace
+  shell: >
+    oc policy add-role-to-user admin admin -n {{ stackanetes_namespace }}
+
+- name: Begin the deploy dun dun dunnnnnn
+  shell: >
+    kpm deploy stackanetes/stackanetes --namespace {{ stackanetes_namespace }} --variables /root/stackanetes-parameters.yaml -H http://{{ kpm_registry_url }}
+
+# ----------- START HERE
+# Ok, next things up are to check for the 
+# $ oc edit scc stackanetes
+# and see if we need to add it.
+# And then the API privs
+# And finally allow the admin to use this namespace.
+
+# [root@testkpm stackanetes]# oc export scc anyuid
+# [...exported yaml...]
+# [root@testkpm stackanetes]# nano scc.yml
+# [root@testkpm stackanetes]# oc create -f scc.yml 
+# securitycontextconstraints "stackanetes" created
+
+# $ rm -Rf /tmp/stackanetes
+# $ oc new-project openstack
+# $ oc adm policy add-scc-to-user stackanetes -z default
+# $ oc adm policy add-cluster-role-to-user view system:serviceaccount:openstack
+# $ oc adm policy add-cluster-role-to-user view system:serviceaccount:openstack:default
+# $ oc policy add-role-to-user admin admin -n openstack
+
+

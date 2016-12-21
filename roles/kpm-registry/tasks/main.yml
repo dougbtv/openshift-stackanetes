@@ -1,0 +1,65 @@
+---
+- name: Check if registry is up
+  shell: >
+    oc projects -q
+  register: oc_projects
+
+- name: Create kpm namespace
+  shell: >
+    oc new-project kpm
+  when: "'kpm' not in oc_projects.stdout"
+  register: kpm_namespace
+
+# - name: check oc projects
+#   shell: >
+#     oc projects
+#   register: check
+
+- name: Set anyuid role to kpm service account
+  shell: >
+    oc adm policy add-scc-to-user anyuid -z default
+  when: kpm_namespace.changed
+
+- name: Add the admin role to the admin user for the kpm namespace
+  shell: >
+    oc policy add-role-to-user admin admin -n kpm
+  when: kpm_namespace.changed
+
+- name: Check for kpm anyuid
+  shell: >
+    oc export scc anyuid
+  register: scc_anyuid
+  when: kpm_namespace.changed
+
+# - debug: "msg={{ scc_anyuid }}"
+
+- name: Fail when kpm anyuid scc isn't present
+  fail:
+    msg: Somehow kpm anyuid scc isn't on the kpm service account
+  when: "scc_anyuid.changed and 'kpm' not in scc_anyuid.stdout"
+
+- name: Bring up registry
+  shell: > 
+    kpm deploy coreos/kpm-registry --namespace kpm -H https://beta.kpm.sh
+  when: kpm_namespace.changed
+
+- name: Always switch to kpm namespace
+  command: >
+    oc project kpm
+
+- name: Get kpm registry pod name
+  shell: >
+    oc get pods | awk '/kpm-registry/ {print $1}'
+  register: kpm_pod_name
+
+- name: Get kpm cluster URL
+  shell: >
+    oc describe pod {{ kpm_pod_name.stdout }} | grep KPM_URI | awk '{print $2}' | perl -p -i -e 's|^https?://(.+)$|$1|'
+  register: kpm_cluster_url
+
+- name: Set kpm cluster URL as fact
+  set_fact: 
+    kpm_registry_url: "{{ kpm_cluster_url.stdout }}"
+
+- debug:
+    msg: "The KPM registry is @ {{ kpm_registry_url }}"

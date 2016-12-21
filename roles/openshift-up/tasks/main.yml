@@ -1,0 +1,16 @@
+---
+- name: Determine if cluster is up
+  shell: >
+    docker ps --format "table {{ '{{' }}.Image{{ '}}' }}"
+  register: docker_ps
+
+# - debug: "msg={{ docker_ps }}"
+
+- name: Bring cluster up
+  shell: >
+    oc cluster up
+  when: "'openshift/origin' not in docker_ps.stdout"
+
+- name: Login every time?
+  shell: >
+    oc login -u system:admin
