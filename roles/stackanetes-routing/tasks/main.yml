@@ -1,0 +1,25 @@
+---
+# Create routes for stackanetes & configure /etc/hosts
+
+- name: Switch to openstack project every time.
+  shell: >
+    oc project {{ stackanetes_namespace }}
+
+- name: Get stackanetes routes
+  shell: >
+    oc get routes
+  register: stackanetes_routes
+
+- name: Create route for each stackanetes domain
+  shell: >
+    oc expose service/traefik --name=traefik.{{ item }} --hostname={{ item }}
+  when: "'{{ item }}' not in stackanetes_routes.stdout"
+  with_items: "{{stackanetes_domains}}"
+
+- name: Create /etc/hosts entries
+  lineinfile:
+    dest: /etc/hosts
+    state: present
+    regexp: "{{ main_ip_address }} {{ item }}"
+    line: "{{ main_ip_address }} {{ item }}"
+  with_items: "{{stackanetes_domains}}"    

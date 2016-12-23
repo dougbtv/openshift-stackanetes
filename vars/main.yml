@@ -5,3 +5,12 @@ skip_kpm_push: false
 force_kpm_push: false
 # was originally eno0
 minion_interface_name: eth0
+stackanetes_domains:
+  - identity.openstack.cluster
+  - horizon.openstack.cluster
+  - image.openstack.cluster
+  - network.openstack.cluster
+  - volume.openstack.cluster
+  - compute.openstack.cluster
+  - novnc.compute.openstack.cluster
+  - search.openstack.cluster

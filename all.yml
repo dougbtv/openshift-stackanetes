@@ -21,14 +21,16 @@
     # - { role: docker-install }
     # - { role: dougbtv.kpm-install , kpm_version: "v0.21.2" }
     # - { role: openshift-install }
-    - { role: openshift-up }
+    # - { role: openshift-up }
     
     # This is required for roles which look at the registry.... (as it gets the URL and sets it as a fact.)
-    - { role: kpm-registry }
+    # - { role: kpm-registry }
     
-    - { role: openshift-aio-dns-hack }
+    # - { role: openshift-aio-dns-hack }
     
     # - { role: stackanetes-configure, stackanetes_teardown: true }
     # skip the (sometimes time consuming) push with: skip_kpm_push: true
     # force_kpm_push: true
-    - { role: stackanetes-configure }
+    # - { role: stackanetes-configure }
+
+    - { role: stackanetes-routing }
