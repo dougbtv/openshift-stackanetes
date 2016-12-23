@@ -2,5 +2,6 @@ facter_ipaddress: ipaddress_eth0
 stackanetes_namespace: openstack
 stackanetes_teardown: false
 skip_kpm_push: false
+force_kpm_push: false
 # was originally eno0
 minion_interface_name: eth0
