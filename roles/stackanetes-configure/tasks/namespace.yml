@@ -25,13 +25,13 @@
     oc create -f /root/stackanetes-scc.yml
   when: "template_scc.changed or 'stackanetes' not in list_sccs.stdout"
 
-# - name: Assign stackanetes SCC to default serviceaccount user 
-#   shell: >
-#     oc adm policy add-scc-to-user stackanetes -z default
-
-- name: Assign PRIVILEDGED SCC to default serviceaccount user 
+- name: Assign stackanetes SCC to default serviceaccount user 
   shell: >
-    oc adm policy add-scc-to-user privileged -z default
+    oc adm policy add-scc-to-user stackanetes -z default
+
+# - name: Assign PRIVILEDGED SCC to default serviceaccount user 
+#   shell: >
+#     oc adm policy add-scc-to-user privileged -z default
 
 # TODO: This is WAY overpowered, Traefik couldn't create a watch.
 - name: Grant cluster-admin API privileges to service accounts
