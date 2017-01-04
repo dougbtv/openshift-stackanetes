@@ -1,0 +1,8 @@
+---
+# }[root@labstackanetes ~]# iptables -A KUBE-NODEPORT-NON-LOCAL -p tcp -m tcp --dport 8443 -j ACCEPT
+- iptables:
+    chain: KUBE-NODEPORT-NON-LOCAL
+    destination_port: 8443
+    protocol: tcp
+    # source: 0.0.0.0/0
+    jump: ACCEPT
