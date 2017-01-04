@@ -44,7 +44,7 @@
   args: 
     chdir: /usr/src/stackanetes
   register: kpm_push_result
-  when: "not skip_kpm_push and git_stackanetes.changed"
+  when: "(not skip_kpm_push and git_stackanetes.changed) or force_kpm_push"
 
 # - debug: "msg={{ kpm_push_result }}"
 
