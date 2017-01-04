@@ -1,4 +1,4 @@
-facter_ipaddress: ipaddress
+facter_ipaddress: ipaddress_enp1s0f1
 stackanetes_namespace: openstack
 stackanetes_teardown: false
 skip_kpm_push: false
