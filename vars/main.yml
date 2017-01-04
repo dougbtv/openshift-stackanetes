@@ -1,10 +1,10 @@
-facter_ipaddress: ipaddress_eth0
+facter_ipaddress: ipaddress
 stackanetes_namespace: openstack
 stackanetes_teardown: false
 skip_kpm_push: false
 force_kpm_push: false
 # was originally eno0
-minion_interface_name: eth0
+minion_interface_name: enp1s0f1
 stackanetes_domains:
   - identity.openstack.cluster
   - horizon.openstack.cluster
