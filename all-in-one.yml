@@ -3,21 +3,9 @@
   vars_files:
     - vars/main.yml
   tasks: []
-  pre_tasks: 
-    - name: Install facter
-      yum:
-        name: facter
-        state: present
-
-    - name: Get IP address with facter
-      shell: >
-        facter {{ facter_ipaddress }}
-      register: facter_result
-
-    - name: Set IP address as fact
-      set_fact: 
-        main_ip_address: "{{ facter_result.stdout}}"
+  # pre_tasks: 
   roles:
+    - { role: get-metrics }
     - { role: docker-install }
     - { role: dougbtv.kpm-install , kpm_version: "v0.21.2" }
     - { role: openshift-install }

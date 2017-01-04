@@ -1,4 +1,4 @@
-stackanetes ansible_ssh_host=192.168.122.167 ansible_ssh_user=root
+stackanetes ansible_ssh_host=192.168.1.100 ansible_ssh_user=root
 
 [allinone]
 stackanetes
