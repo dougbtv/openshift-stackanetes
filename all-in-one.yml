@@ -6,7 +6,7 @@
   # pre_tasks: 
   roles:
     #- { role: iptables-config }
-    - { role: get-metrics }
+    - { role: get-ipaddress }
     - { role: docker-install }
     - { role: dougbtv.kpm-install , kpm_version: "v0.21.2" }
     - { role: openshift-install }
