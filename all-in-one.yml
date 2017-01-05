@@ -5,12 +5,12 @@
   tasks: []
   # pre_tasks: 
   roles:
-    #- { role: iptables-config }
     - { role: get-ipaddress }
     - { role: docker-install }
     - { role: dougbtv.kpm-install , kpm_version: "v0.21.2" }
     - { role: openshift-install }
     - { role: openshift-up }
+    - { role: iptables-config }
     
     # This is required for roles which look at the registry.... (as it gets the URL and sets it as a fact.)
     - { role: kpm-registry }
@@ -22,3 +22,11 @@
     - { role: stackanetes-configure, force_kpm_push: true }
 
     - { role: stackanetes-routing }
+  post_tasks:
+    - debug:
+        msg: |
+          Here's an example /etc/hosts file
+          {{ example_etc_hosts }}
+
+    - debug: 
+        msg: "The KPM registry is @ {{ kpm_registry_url }}"
