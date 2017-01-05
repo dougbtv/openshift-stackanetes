@@ -18,11 +18,16 @@
     # other options: skip_kpm_push: true, stackanetes_teardown: true
     - { role: stackanetes-configure, force_kpm_push: true } 
     - { role: stackanetes-routing }
+    - { role: install-openstack-clients }
   post_tasks:
+
+    - debug: msg="Following are example /etc/hosts file entries"
+
     - debug:
-        msg: |
-          Here's an example /etc/hosts file
-          {{ example_etc_hosts }}
+        msg: "{{ example_etc_hosts.split('\n') }}"
+
+    - debug:
+        msg: "The KPM registry is @ {{ kpm_registry_url }}"
 
     - debug: 
-        msg: "The KPM registry is @ {{ kpm_registry_url }}"
+        msg: "The OpenShift dashboard is available @ https://{{ main_ip_address }}:8443"
