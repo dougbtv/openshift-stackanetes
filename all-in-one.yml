@@ -5,22 +5,18 @@
   tasks: []
   # pre_tasks: 
   roles:
+    - { role: ensure-default-dns }
     - { role: get-ipaddress }
     - { role: docker-install }
     - { role: dougbtv.kpm-install , kpm_version: "v0.21.2" }
     - { role: openshift-install }
     - { role: openshift-up }
     - { role: iptables-config }
-    
-    # This is required for roles which look at the registry.... (as it gets the URL and sets it as a fact.)
-    - { role: kpm-registry }
-    
+    # kpm-registry role is required for roles which look at the registry
+    - { role: kpm-registry } 
     - { role: openshift-aio-dns-hack }
-    
-    # skip the (sometimes time consuming) push with: skip_kpm_push: true
-    # - { role: stackanetes-configure, stackanetes_teardown: true }
-    - { role: stackanetes-configure, force_kpm_push: true }
-
+    # other options: skip_kpm_push: true, stackanetes_teardown: true
+    - { role: stackanetes-configure, force_kpm_push: true } 
     - { role: stackanetes-routing }
   post_tasks:
     - debug:

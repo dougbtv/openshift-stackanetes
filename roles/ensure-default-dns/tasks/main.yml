@@ -1,0 +1,13 @@
+---
+# DNS will fail if cluster is down and default DNS is in place
+- name: See if the cluster is up, in order to default the DNS nameserver
+  shell: >
+    oc projects
+  ignore_errors: yes
+  register: oc_projects
+
+- name: Default resolv.conf when cluster is down.
+  template: 
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+  when: "oc_projects.rc != 0"
