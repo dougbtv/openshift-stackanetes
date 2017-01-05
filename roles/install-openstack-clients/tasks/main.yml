@@ -14,3 +14,8 @@
   with_items:
     - python-openstackclient
     - python-neutronclient
+
+- name: Template stackanetesrc
+  template:
+    src: stackanetesrc.j2
+    dest: /root/stackanetesrc
