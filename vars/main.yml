@@ -1,4 +1,5 @@
 facter_ipaddress: ipaddress_enp1s0f1
+default_nameserver: 8.8.8.8
 stackanetes_namespace: openstack
 stackanetes_teardown: false
 skip_kpm_push: false

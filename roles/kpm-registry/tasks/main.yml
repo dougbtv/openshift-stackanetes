@@ -56,6 +56,13 @@
   shell: >
     oc describe pod {{ kpm_pod_name.stdout }} | grep KPM_URI | awk '{print $2}' | perl -p -i -e 's|^https?://(.+)$|$1|'
   register: kpm_cluster_url
+  until: "'cluster' in kpm_cluster_url.stdout"
+  retries: 15
+  delay: 2
+
+# - shell: exit 1
+#   register: task_result
+#   ignore_errors: yes
 
 - name: Set kpm cluster URL as fact
   set_fact: 

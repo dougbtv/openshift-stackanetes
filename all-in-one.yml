@@ -5,20 +5,29 @@
   tasks: []
   # pre_tasks: 
   roles:
-    - { role: get-metrics }
+    - { role: ensure-default-dns }
+    - { role: get-ipaddress }
     - { role: docker-install }
     - { role: dougbtv.kpm-install , kpm_version: "v0.21.2" }
     - { role: openshift-install }
     - { role: openshift-up }
-    
-    # This is required for roles which look at the registry.... (as it gets the URL and sets it as a fact.)
-    - { role: kpm-registry }
-    
+    - { role: iptables-config }
+    # kpm-registry role is required for roles which look at the registry
+    - { role: kpm-registry } 
     - { role: openshift-aio-dns-hack }
-    
-    # skip the (sometimes time consuming) push with: skip_kpm_push: true
-    # force_kpm_push: true
-    # - { role: stackanetes-configure, stackanetes_teardown: true }
-    - { role: stackanetes-configure }
-
+    # other options: skip_kpm_push: true, stackanetes_teardown: true
+    - { role: stackanetes-configure, force_kpm_push: true } 
     - { role: stackanetes-routing }
+    - { role: install-openstack-clients }
+  post_tasks:
+
+    - debug: msg="Following are example /etc/hosts file entries"
+
+    - debug:
+        msg: "{{ example_etc_hosts.split('\n') }}"
+
+    - debug:
+        msg: "The KPM registry is @ {{ kpm_registry_url }}"
+
+    - debug: 
+        msg: "The OpenShift dashboard is available @ https://{{ main_ip_address }}:8443"
