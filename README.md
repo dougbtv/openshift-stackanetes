@@ -20,9 +20,7 @@ Then run like:
 ansible-playbook -i inventory all-in-one.yml
 ```
 
+### Need more info?
 
-
-### Accessing the OpenShift & OpenStack dashboards
-
-### Troubleshooting
+This readme should be updated in the future, but, for now you can use [this walkthrough that I have posted on my blog dougbtv.com](http://dougbtv.com/nfvpe/2017/01/09/stackanetes-on-openshift/).
 
