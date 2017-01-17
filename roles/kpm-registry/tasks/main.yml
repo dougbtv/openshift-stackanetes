@@ -47,6 +47,24 @@
   command: >
     oc project kpm
 
+- name: Wait until all etcd pods are running
+  shell: > 
+    oc get pods | grep -P "etcd.+Running" | wc -l
+  register: etcd_pods_running
+  ignore_errors: yes
+  until: "'3' in etcd_pods_running.stdout and etcd_pods_running.rc == 0"
+  retries: 60
+  delay: 2
+
+- name: Wait until the kpm-registry pod is running
+  shell: > 
+    oc get pods | grep -P "registry.+Running" | wc -l
+  register: kpm_pods_running
+  ignore_errors: yes
+  until: "'1' in kpm_pods_running.stdout and kpm_pods_running.rc == 0"
+  retries: 60
+  delay: 2
+
 - name: Get kpm registry pod name
   shell: >
     oc get pods | awk '/kpm-registry/ {print $1}'

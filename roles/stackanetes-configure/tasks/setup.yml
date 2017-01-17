@@ -32,11 +32,6 @@
     src: stackanetes-parameters.yml.j2
     dest: /root/stackanetes-parameters.yaml
 
-# Maybe for the future...
-# [root@stackanetes ~]# kpm list -H http://kpm-registry.kpm.svc.cluster.local
-# This didn't work -- when the registry is empty.
-# Once there's something in there, it works a charm.
-
 - name: Push all the stackanetes kpm packages up to the registry
   shell: >
     find -maxdepth 1  -type d -exec bash -c "cd {} ; [[ -f manifest.jsonnet ]] && 
@@ -45,6 +40,20 @@
     chdir: /usr/src/stackanetes
   register: kpm_push_result
   when: "(not skip_kpm_push and git_stackanetes.changed) or force_kpm_push"
+
+# Maybe for the future...
+# [root@stackanetes ~]# kpm list -H http://kpm-registry.kpm.svc.cluster.local
+# This didn't work -- when the registry is empty.
+# Once there's something in there, it works a charm.
+
+- name: Wait until the kpm list contains a pushed stackanetes registry item
+  shell: > 
+    kpm list -H http://{{ kpm_registry_url }}
+  register: kpm_list_contents
+  ignore_errors: yes
+  until: "'stackanetes' in kpm_list_contents.stdout and kpm_list_contents.rc == 0"
+  retries: 60
+  delay: 2
 
 # - debug: "msg={{ kpm_push_result }}"
 
