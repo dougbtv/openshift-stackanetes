@@ -1,4 +1,7 @@
 ---
+- include: bootstrap.yml
+  when: "bootstrap_kpm_registry"
+
 - name: Check if registry is up
   shell: >
     oc projects -q
@@ -40,7 +43,7 @@
 
 - name: Bring up registry
   shell: > 
-    kpm deploy coreos/kpm-registry --namespace kpm -H https://beta.kpm.sh
+    kpm deploy coreos/kpm-registry --namespace kpm -H {{ bootstrap_kpm_registry_uri }}
   when: kpm_namespace.changed
 
 - name: Always switch to kpm namespace
@@ -88,3 +91,6 @@
 
 - debug:
     msg: "The KPM registry is @ {{ kpm_registry_url }}"
+
+- include: bootstrap-cleanup.yml
+  when: "bootstrap_kpm_registry"

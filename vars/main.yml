@@ -15,3 +15,6 @@ stackanetes_domains:
   - compute.openstack.cluster
   - novnc.compute.openstack.cluster
   - search.openstack.cluster
+bootstrap_kpm_registry: true
+bootstrap_kpm_registry_uri: https://beta.kpm.sh
+kpm_registry_local_port: 5555
