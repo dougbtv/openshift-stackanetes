@@ -1,0 +1,26 @@
+[Unit]
+Description=KPM registry local instance
+After=network.target
+# Conflicts=sendmail.service exim.service
+
+[Service]
+Type=simple
+# PIDFile=/var/spool/postfix/pid/master.pid
+# EnvironmentFile=-/etc/sysconfig/network
+ExecStartPre=-/usr/bin/docker rm kpm-bootstrap-etcd
+ExecStartPre=/usr/bin/docker pull quay.io/coreos/etcd:v3.0.6
+ExecStartPre=/usr/bin/docker run \
+    --name kpm-bootstrap-etcd \
+    -p 2379:2379 -p 2380:2380 \
+    -dt \
+    quay.io/coreos/etcd:v3.0.6 \
+    /usr/local/bin/etcd \
+      -listen-client-urls http://0.0.0.0:2379,http://0.0.0.0:4001 \
+      -advertise-client-urls http://$127.0.0.1:2379,http://127.0.0.1:4001
+ExecStart=/usr/bin/gunicorn kpm.api.wsgi:app -b :{{ kpm_registry_local_port }}
+# ExecReload=/usr/sbin/postfix reload
+ExecStopPost=-/usr/bin/docker stop kpm-bootstrap-etcd
+ExecStopPost=-/usr/bin/docker rm kpm-bootstrap-etcd
+
+[Install]
+WantedBy=multi-user.target

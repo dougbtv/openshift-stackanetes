@@ -1,0 +1,81 @@
+---
+# This bootstraps a kpm registry by running a kpm registry.
+# And then allows you 
+
+- name: Make sure gunicorn is available
+  yum:
+    name: python-gunicorn
+    state: present
+
+- name: Template systemd unit for local kpm registry
+  template:
+    src: kpm-bootstrap.service.j2
+    dest: /usr/lib/systemd/system/kpm-bootstrap.service
+
+- name: Reload systemd units
+  shell: >
+    systemctl daemon-reload
+
+- name: Start up the kpm-bootstrap service
+  service:
+    name: kpm-bootstrap
+    state: started
+
+- name: Set the kpm bootstrapping registry URL to be local.
+  set_fact:
+    bootstrap_kpm_registry_uri: "http://localhost:{{ kpm_registry_local_port }}"
+
+- name: Make sure we can curl the URL.
+  shell: > 
+    curl {{ bootstrap_kpm_registry_uri }}
+  register: local_registry_running
+  ignore_errors: yes
+  until: "local_registry_running.rc == 0"
+  retries: 60
+  delay: 1
+
+- name: Make sure the proper image tag is in the kpm-registry manifest
+  shell: >
+    sed -i 's/v0.21.2/v0.21.1/' manifest.jsonnet 
+  args: 
+    chdir: /usr/src/kpm/deploy/kpm-registry/
+
+- name: Push the kpm-registry package to kpm-registry
+  shell: >
+    kpm push -H http://{{ bootstrap_kpm_registry_uri }} -f
+  args: 
+    chdir: /usr/src/kpm/deploy/kpm-registry/
+  
+# This is required until this merge is available: https://github.com/ansible/ansible/pull/19057
+- name: Wipe kubespray-kpm-packages clone directory
+  file: 
+    path: /usr/src/kubespray-kpm-packages
+    state: absent
+
+- name: Clone the kubespray-kpm-packages repo
+  git:
+    repo: https://github.com/kubespray/kpm-packages.git
+    dest: /usr/src/kubespray-kpm-packages
+    version: master
+    # force: yes
+
+- name: Push the coreos/etcd package to the kpm-registry
+  shell: >
+    kpm push -H http://{{ bootstrap_kpm_registry_uri }} -f
+  args: 
+    chdir: /usr/src/kubespray-kpm-packages/coreos/etcdv3  
+
+- name: Pull up the list of kpm packages
+  shell: >
+    kpm list -H http://{{ bootstrap_kpm_registry_uri }}
+  register: kpm_list
+
+- name: Fail if kpm list doesn't contain etcd
+  fail:
+    msg: "list must contain etcd"
+  when: "'etcd' not in kpm_list.stdout"
+
+- name: Fail if kpm list doesn't contain kpm-registry
+  fail:
+    msg: "list must contain kpm-registry"
+  when: "'kpm-registry' not in kpm_list.stdout"

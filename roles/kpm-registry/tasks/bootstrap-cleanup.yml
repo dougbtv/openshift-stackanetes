@@ -1,0 +1,5 @@
+---
+- name: Stop the kpm-bootstrap service
+  service:
+    name: kpm-bootstrap
+    state: stopped
